@@ -1,25 +1,83 @@
-const easy = [
-    "6------7------5-2------1---362----81--96-----71--9-4-5-2---651---78----345-------",
-    "685329174971485326234761859362574981549618732718293465823946517197852643456137298"
-  ];
-const medium = [
-"--9-------4----6-758-31----15--4-36-------4-8----9-------75----3-------1--2--3--",
-"619472583243985617587316924158247369926531478734698152891754236365829741472163895"
-];
-const hard = [
-"-1-5-------97-42----5----7-5---3---7-6--2-41---8--5---1-4------2-3-----9-7----8--",
-"712583694639714258845269173521436987367928415498175326184697532253841769976352841"
-];
+
+let grid = 
+// [
+//     [3,0,6,5,0,8,4,0,0], 
+//     [5,2,0,0,0,0,0,0,0], 
+//     [0,8,7,0,0,0,0,3,1], 
+//     [0,0,3,0,1,0,0,8,0], 
+//     [9,0,0,8,6,3,0,0,5], 
+//     [0,5,0,0,9,0,6,0,0], 
+//     [1,3,0,0,0,0,2,5,0], 
+//     [0,0,0,0,0,0,0,7,4], 
+//     [0,0,5,2,0,6,3,0,0]
+// ]
+// [
+//     [0,0,3,0,2,0,6,0,0],
+//     [9,0,0,3,0,5,0,0,1],
+//     [0,0,1,8,0,6,4,0,0],
+//     [0,0,8,1,0,2,9,0,0],
+//     [7,0,0,0,0,0,0,0,8],
+//     [0,0,6,7,0,8,2,0,0],
+//     [0,0,2,6,0,9,5,0,0],
+//     [8,0,0,2,0,3,0,0,9],
+//     [0,0,5,0,1,0,3,0,0]
+// ]
+// [
+//     [0,0,0,6,0,0,7,0,0],
+//     [0,7,0,8,0,0,6,1,0],
+//     [0,8,0,4,7,2,0,0,0],
+//     [0,1,0,0,0,0,5,0,0],
+//     [0,0,5,0,0,0,4,0,0],
+//     [0,0,6,0,0,0,0,9,0],
+//     [0,0,0,5,4,1,0,2,0],
+//     [0,5,4,0,0,7,0,6,0],
+//     [0,0,8,0,0,3,0,0,0]
+// ]
+// [
+//     [0,8,0,0,0,0,0,0,3],
+//     [9,0,1,0,3,4,0,0,8],
+//     [0,6,4,8,0,0,7,2,0],
+//     [2,0,3,0,0,0,0,0,0],
+//     [8,0,6,5,9,3,2,0,4],
+//     [0,0,0,0,0,0,3,0,5],
+//     [0,7,8,0,0,2,4,3,0],
+//     [4,0,0,6,8,0,9,0,7],
+//     [6,0,0,0,0,0,0,1,0]
+// ]
+// [
+//     [0,0,3,7,0,0,0,8,0],
+//     [0,0,0,0,0,8,2,5,0],
+//     [0,8,5,0,1,0,3,0,0],
+//     [0,9,0,3,6,0,5,0,0],
+//     [6,0,0,0,0,0,0,0,1],
+//     [0,0,1,0,7,4,0,9,0],
+//     [0,0,9,0,8,0,6,4,0],
+//     [0,3,2,4,0,0,0,0,0],
+//     [0,4,0,0,0,7,9,0,0]
+// ]
+[
+    [0,2,4,0,0,0,0,0,0],
+    [8,0,5,0,6,0,0,0,0],
+    [3,0,0,0,0,0,1,5,9],
+    [0,7,0,0,2,0,3,0,0],
+    [0,0,1,9,0,7,6,0,0],
+    [0,0,2,0,4,0,0,7,0],
+    [1,5,9,0,0,0,0,0,6],
+    [0,0,0,0,9,0,4,0,7],
+    [0,0,0,0,0,0,9,8,0],
+]
+
+let tile_list = grid;
+var rows;
+var columns;
 var lives;
 var disableSelect;  
 var selectedNum;
 var selectedTile
 var timeRemaining;
-// const id = (id) => {
-//     return(document.getElementById(id));
-// }
-function id(id){
-    return document.getElementById(id);
+var recursions = 0;
+const id = (id) => {
+    return(document.getElementById(id));
 }
 const qs = (selector) => {
     return document.querySelector(selector)
@@ -55,6 +113,7 @@ const timeConversion = (time) => {
 
 window.onload = function(){
     id("start-btn").addEventListener("click", startGame);
+    id("solve-btn").addEventListener("click", solveGame);
     for(let i=0; i<id("number-container").children.length; i++){
         id("number-container").children[i].addEventListener("click", function() {
             if(!disableSelect){
@@ -68,16 +127,20 @@ window.onload = function(){
                     }
                     this.classList.add("selected");
                     selectedNum = this;
-                    updateMove();
+                    if(selectedTile){
+                        updateMove(rows, columns);
+                    }
+                    // updateMoveContainer();
                 }
             }
         });
     }
+
 }
 const startGame = () => {
     let board;
     if(id("diff-1").checked){
-        board = easy[0];
+        board = grid;
     }
     else if(id("diff-2").checked){
         board = medium[0];
@@ -87,7 +150,6 @@ const startGame = () => {
     }
     lives = 3;
     disableSelect = false;
-    // id("lives").textContent = `Remaining lives: ${lives}`
     id("lives").textContent = "Remaining lives: 3";
     generateBoard(board);
     startTimer();
@@ -102,11 +164,11 @@ const startGame = () => {
 }
 const generateBoard = (board) => {
     clearPrevious();
-    idCount = 0;
-    for(let i=0; i<81; i++ ){ 
+    for(let i=0; i<9; i++ ){
+        for(let j=0; j<9; j++){ 
         let tile = document.createElement("p");
-        if(board.charAt(i) != "-"){
-            tile.textContent = board.charAt(i);
+        if(board[i][j] != 0){
+            tile.textContent = board[i][j];
         }
         else{
             tile.addEventListener("click", function() {
@@ -116,34 +178,47 @@ const generateBoard = (board) => {
                         selectedTile = null;
                     }
                     else{
-                        for(let i=0; i<81; i++){
-                            qsa(".tile")[i].classList.remove("selected");
+                        for(let m=0; m<81; m++){
+                            qsa(".tile")[m].classList.remove("selected");
                         }
                         tile.classList.add("selected")
                         selectedTile = tile;
-                        updateMove();
+                        rows = i;
+                        columns = j;
+                        updateMove(i, j);
                     }
                 }
             })
         }
-        tile.id = idCount;
-        idCount++;
         tile.classList.add("tile");
-        if((tile.id > 17 && tile.id< 27) || (tile.id > 44 && tile.id< 54)){
+        if((i==2 && [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(j)) || (i==5 && [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(j))){
             tile.classList.add("bottomBorder");
         }
-        if ((tile.id + 1) % 9==3 || ((tile.id+1)%9==6)){
+        if (([0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(i) && j==2) || ([0, 1, 2, 3, 4, 5, 6, 7, 8, 9].includes(i) && j==5)){
             tile.classList.add("rightBorder");
         } 
         id("board").appendChild(tile);
     }
-    
+}
+//setting row and col to tiles
+let tiles = qsa(".tile");
+let m =0;
+for(let i=0; i<9; i++){
+    for(let j=0; j<9; j++){
+        tiles[m].pos={
+            row: i,
+            col: j,
+        }
+        m++;
+    }
+}
 }
 
-function updateMove() {
+function updateMove(i, j) {
+    console.log("update" + i + j)
     if(selectedTile && selectedNum){
         selectedTile.textContent = selectedNum.textContent;
-        if(checkCorrect(selectedTile)){
+        if(checkCorrect(i, j, selectedTile.textContent)){
             selectedTile.classList.remove("selected");
             selectedNum.classList.remove("selected");
             selectedNum = null;
@@ -175,22 +250,26 @@ function updateMove() {
         }
     }
 }
+const checkCorrect = (row, col, num) => {
+    for(let i=0; i<9; i++){    
+    if(tile_list[row][i] == num && col!==i){
+        return false
+    }}
+    for(let i=0; i<9; i++){
+        if(tile_list[i][col] == num && row!=i){
+            return false
+        }
+    }
+    box_x = Math.floor(col / 3)
+    box_y = Math.floor(row / 3)
 
-const checkCorrect = (tile) => {
-    let solution;
-    if(id("diff-1").checked){
-        solution = easy[1];
+    for(let i=box_y * 3; i < box_y * 3 + 3; i++){
+        for(let j=box_x * 3; j < box_x * 3 + 3; j++){
+            if(tile_list[i][j] == num && i != row && j!=col)
+            return false;
+        }
     }
-    else if(id("diff-2").checked){
-        solution = medium[1];
-    }
-    else{
-        solution = hard[1];
-    }
-    if (solution.charAt(tile.id) === tile.textContent){
-        return true;
-    }
-    else return false;
+    return true;
 }
 
 const clearPrevious = () => {
@@ -227,3 +306,111 @@ const endGame = () => {
         id("lives").textContent = "You Won!";
     }
 }
+
+const findEmpty = () => {
+    for(let i=0; i<9; i++){
+        for(let j=0; j<9; j++){
+            if(tile_list[i][j] == 0){
+                return [i, j]
+            }
+        }
+    }
+    return null
+}
+
+const findTile = (row, col) => {
+        let tiles = qsa(".tile");
+        for(let i=0; i<tiles.length; i++){
+            if(tiles[i].pos.row == row && tiles[i].pos.col == col){
+                return tiles[i];
+            }
+        }
+}
+const solveGame = () => {
+    recursions++;
+    let row, col;
+    let find = findEmpty();
+    if(!find){
+        
+        return true
+    }
+    else{
+        [row , col] = find
+    }
+    for(let i=1; i<10;i++){
+        if (checkCorrect(row, col, i)){
+            tile_list[row][col] = i
+            let selectTile = findTile(row, col)
+            selectTile.textContent = i
+            if (solveGame()){
+                console.log(recursions)
+                return true
+}
+            tile_list[row][col] = 0
+            selectTile = findTile(row, col)
+            selectTile.textContent = ""
+        }
+}   
+    return false
+}
+    // self.recursion = self.recursion + 1setTimeout(displayGrid, 3000)
+        // console.log("solve")
+        // let tiles = qsa(".tiles");
+        // break_condition = 0
+        // checking_range = []
+        
+        // for(let i=0; i<9; i++){
+        //     for(let j=0; j<9; j++){
+        //         if (grid[i][j] == 0){
+        //             break_condition = 1
+        //             temp = []
+        //             temp.push([i, j])
+        //             temp_2 = []
+        //             for(let num = 1; num<10; num++){
+        //                 if (checkCorrect(i, j, num)){
+                            
+        //                     temp_2.push(num)}}
+        //             temp.push(temp_2.length)
+        //             checking_range.push(temp)}}}
+        // if (break_condition == 0){
+        //     return True
+        // }
+        // console.log(checking_range)
+        // let minimum_range_selection = checking_range[0][0]
+        // let low = checking_range[0][1]
+        // for(let i=0; i<checking_range.length; i++){
+        //     if (checking_range[i][1] < low){
+        //         low = checking_range[i][1]
+        //         minimum_range_selection = checking_range[i][0]}}
+        // let row = minimum_range_selection[0]
+        // let col = minimum_range_selection[1]
+        // console.log("here")
+        // for(let i=1; i<10; i++){
+        //     console.log(i)
+        //     if (checkCorrect(row, col, i)){
+                
+        //         for(let n=0; n<tiles.length; n++){
+                    
+        //             if(tiles[n].pos.row == row && tiles[n].pos.col == col ){
+        //                 var selectTile = tiles[n];
+        //                 selectTile.textContent = i
+        //                 console.log("selectTile")
+        //             }
+        //         }
+        //         grid[row][col] = i
+        //         setTimeout(displayGrid(1, selectTile, i), 3000)}
+
+        //         if (solveGame()){
+        //             return True
+        //         }
+        //         grid[row][col] = 0
+        //         setTimeout(displayGrid(0,selectTile,0), 3000)
+        // //         self.cubes[row][col].set(0)
+        // //         self.update_model()
+        // //         self.cubes[row][col].draw_change(self.win, False)
+        // //         pygame.display.update()
+        // //         pygame.time.delay(100)
+        // }
+        // return False
+
+        console.log(recursions)
