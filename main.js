@@ -1,5 +1,5 @@
 
-let grid = 
+var grid = 
 // [
 //     [3,0,6,5,0,8,4,0,0], 
 //     [5,2,0,0,0,0,0,0,0], 
@@ -11,17 +11,17 @@ let grid =
 //     [0,0,0,0,0,0,0,7,4], 
 //     [0,0,5,2,0,6,3,0,0]
 // ]
-// [
-//     [0,0,3,0,2,0,6,0,0],
-//     [9,0,0,3,0,5,0,0,1],
-//     [0,0,1,8,0,6,4,0,0],
-//     [0,0,8,1,0,2,9,0,0],
-//     [7,0,0,0,0,0,0,0,8],
-//     [0,0,6,7,0,8,2,0,0],
-//     [0,0,2,6,0,9,5,0,0],
-//     [8,0,0,2,0,3,0,0,9],
-//     [0,0,5,0,1,0,3,0,0]
-// ]
+[
+    [0,0,3,0,2,0,6,0,0],
+    [9,0,0,3,0,5,0,0,1],
+    [0,0,1,8,0,6,4,0,0],
+    [0,0,8,1,0,2,9,0,0],
+    [7,0,0,0,0,0,0,0,8],
+    [0,0,6,7,0,8,2,0,0],
+    [0,0,2,6,0,9,5,0,0],
+    [8,0,0,2,0,3,0,0,9],
+    [0,0,5,0,1,0,3,0,0]
+]
 // [
 //     [0,0,0,6,0,0,7,0,0],
 //     [0,7,0,8,0,0,6,1,0],
@@ -55,19 +55,19 @@ let grid =
 //     [0,3,2,4,0,0,0,0,0],
 //     [0,4,0,0,0,7,9,0,0]
 // ]
-[
-    [0,2,4,0,0,0,0,0,0],
-    [8,0,5,0,6,0,0,0,0],
-    [3,0,0,0,0,0,1,5,9],
-    [0,7,0,0,2,0,3,0,0],
-    [0,0,1,9,0,7,6,0,0],
-    [0,0,2,0,4,0,0,7,0],
-    [1,5,9,0,0,0,0,0,6],
-    [0,0,0,0,9,0,4,0,7],
-    [0,0,0,0,0,0,9,8,0],
-]
+// [
+//     [0,2,4,0,0,0,0,0,0],
+//     [8,0,5,0,6,0,0,0,0],
+//     [3,0,0,0,0,0,1,5,9],
+//     [0,7,0,0,2,0,3,0,0],
+//     [0,0,1,9,0,7,6,0,0],
+//     [0,0,2,0,4,0,0,7,0],
+//     [1,5,9,0,0,0,0,0,6],
+//     [0,0,0,0,9,0,4,0,7],
+//     [0,0,0,0,0,0,9,8,0],
+// ]
 
-let tile_list = grid;
+var tile_list = grid;
 var rows;
 var columns;
 var lives;
@@ -76,6 +76,8 @@ var selectedNum;
 var selectedTile
 var timeRemaining;
 var recursions = 0;
+var reset = 1;
+// var board;
 const id = (id) => {
     return(document.getElementById(id));
 }
@@ -113,7 +115,15 @@ const timeConversion = (time) => {
 
 window.onload = function(){
     id("start-btn").addEventListener("click", startGame);
-    id("solve-btn").addEventListener("click", solveGame);
+    id("solve-btn").addEventListener("click", () => {
+        var method = document.getElementById("backtracking").value;
+        if(method==1){
+            solveGameNormal();
+        }
+        else{
+            solveGameMrv();
+        }
+    });
     for(let i=0; i<id("number-container").children.length; i++){
         id("number-container").children[i].addEventListener("click", function() {
             if(!disableSelect){
@@ -138,20 +148,21 @@ window.onload = function(){
 
 }
 const startGame = () => {
-    let board;
+    // var board;
     if(id("diff-1").checked){
-        board = grid;
+        tile_list = grid;
     }
     else if(id("diff-2").checked){
-        board = medium[0];
+        //qs[random()]
+        tile_list = grid;
     }
     else{
-        board = hard[0];
+        tile_list = grid;
     }
     lives = 3;
     disableSelect = false;
     id("lives").textContent = "Remaining lives: 3";
-    generateBoard(board);
+    generateBoard(tile_list);
     startTimer();
     if(id("theme-1").checked){
         qs("body").classList.remove("dark");
@@ -162,13 +173,14 @@ const startGame = () => {
     id("number-container").classList.remove("hidden")
     
 }
-const generateBoard = (board) => {
+const generateBoard = (tile_list) => {
+    console.log("here")
     clearPrevious();
     for(let i=0; i<9; i++ ){
         for(let j=0; j<9; j++){ 
         let tile = document.createElement("p");
-        if(board[i][j] != 0){
-            tile.textContent = board[i][j];
+        if(tile_list[i][j] != 0){
+            tile.textContent = tile_list[i][j];
         }
         else{
             tile.addEventListener("click", function() {
@@ -214,11 +226,14 @@ for(let i=0; i<9; i++){
 }
 }
 
+
 function updateMove(i, j) {
-    console.log("update" + i + j)
+    console.log(grid)
     if(selectedTile && selectedNum){
         selectedTile.textContent = selectedNum.textContent;
         if(checkCorrect(i, j, selectedTile.textContent)){
+            tile_list[i][j] = Number(selectedTile.textContent);
+            // console.log(tile_list)
             selectedTile.classList.remove("selected");
             selectedNum.classList.remove("selected");
             selectedNum = null;
@@ -296,6 +311,17 @@ const checkDone = () => {
     return true;
 }
 
+const checkDonewithRecursion = () => {
+    let tiles = qsa(".tile");
+    for(let i=0; i<tiles.length; i++){
+        if(tiles[i].textContent === ""){
+            return false;
+        }
+    }
+    return true;
+}
+
+
 const endGame = () => {
     disableSelect = true;
     clearTimeout(timer);
@@ -326,91 +352,91 @@ const findTile = (row, col) => {
             }
         }
 }
-const solveGame = () => {
+ const solveGameNormal = () => 
+ {  generateBoard(grid);
+    if(checkDonewithRecursion()){
+        id("recursion").textContent = "Number of recursions: " + recursions;
+        endGame();
+    }
     recursions++;
     let row, col;
     let find = findEmpty();
     if(!find){
-        
         return true
     }
     else{
-        [row , col] = find
+        [row , col] = find;
     }
     for(let i=1; i<10;i++){
         if (checkCorrect(row, col, i)){
             tile_list[row][col] = i
+            // await sleep(900);
             let selectTile = findTile(row, col)
+            
             selectTile.textContent = i
-            if (solveGame()){
-                console.log(recursions)
+            if ((solveGameNormal())){
                 return true
 }
             tile_list[row][col] = 0
+            // await sleep(900);
             selectTile = findTile(row, col)
+            
             selectTile.textContent = ""
         }
 }   
     return false
 }
-    // self.recursion = self.recursion + 1setTimeout(displayGrid, 3000)
-        // console.log("solve")
-        // let tiles = qsa(".tiles");
-        // break_condition = 0
-        // checking_range = []
+const solveGameMrv = () => 
+{       recursions++;
+        break_condition = 0
+        checking_range = []
         
-        // for(let i=0; i<9; i++){
-        //     for(let j=0; j<9; j++){
-        //         if (grid[i][j] == 0){
-        //             break_condition = 1
-        //             temp = []
-        //             temp.push([i, j])
-        //             temp_2 = []
-        //             for(let num = 1; num<10; num++){
-        //                 if (checkCorrect(i, j, num)){
-                            
-        //                     temp_2.push(num)}}
-        //             temp.push(temp_2.length)
-        //             checking_range.push(temp)}}}
-        // if (break_condition == 0){
-        //     return True
-        // }
-        // console.log(checking_range)
-        // let minimum_range_selection = checking_range[0][0]
-        // let low = checking_range[0][1]
-        // for(let i=0; i<checking_range.length; i++){
-        //     if (checking_range[i][1] < low){
-        //         low = checking_range[i][1]
-        //         minimum_range_selection = checking_range[i][0]}}
-        // let row = minimum_range_selection[0]
-        // let col = minimum_range_selection[1]
-        // console.log("here")
-        // for(let i=1; i<10; i++){
-        //     console.log(i)
-        //     if (checkCorrect(row, col, i)){
-                
-        //         for(let n=0; n<tiles.length; n++){
-                    
-        //             if(tiles[n].pos.row == row && tiles[n].pos.col == col ){
-        //                 var selectTile = tiles[n];
-        //                 selectTile.textContent = i
-        //                 console.log("selectTile")
-        //             }
-        //         }
-        //         grid[row][col] = i
-        //         setTimeout(displayGrid(1, selectTile, i), 3000)}
+        for(let i=0; i<9; i++){
+            for(let j=0; j<9; j++){
+                if (grid[i][j] == 0){
+                    break_condition = 1
+                    temp = []
+                    temp.push([i, j])
+                    temp_2 = []
+                    for(let num = 1; num<10; num++){
+                        if (checkCorrect(i, j, num)){
+                            temp_2.push(num)}}
+                    temp.push(temp_2.length)
+                    checking_range.push(temp)}}}
+        if (break_condition == 0){
+            return true
+        }
+        let minimum_range_selection = checking_range[0][0]
+        let low = checking_range[0][1]
+        for(let i=0; i<checking_range.length; i++){
+            if (checking_range[i][1] < low){
+                low = checking_range[i][1]
+                minimum_range_selection = checking_range[i][0]}}
+        let row = minimum_range_selection[0]
+        let col = minimum_range_selection[1]
+        for(let i=1; i<10; i++){
+            if (checkCorrect(row, col, i)){
+                tile_list[row][col] = i
+                let selectTile = findTile(row, col);
+                selectTile.textContent = i
 
-        //         if (solveGame()){
-        //             return True
-        //         }
-        //         grid[row][col] = 0
-        //         setTimeout(displayGrid(0,selectTile,0), 3000)
-        // //         self.cubes[row][col].set(0)
-        // //         self.update_model()
-        // //         self.cubes[row][col].draw_change(self.win, False)
-        // //         pygame.display.update()
-        // //         pygame.time.delay(100)
-        // }
-        // return False
+                if (solveGameMrv()){
+                    if(checkDonewithRecursion()){
+                        id("recursion").textContent = "Number of recursions: " + recursions;
+                        endGame();
+                    }
+                    return true
+                }
 
-        console.log(recursions)
+                tile_list[row][col] = 0
+                selectTile = findTile(row, col)
+                selectTile.textContent = ""
+        }}
+    return false
+    }
+        
+
+
+function sleep(ms) {
+return new Promise(resolve => setTimeout(resolve, ms));
+}

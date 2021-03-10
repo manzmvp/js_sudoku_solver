@@ -31,12 +31,17 @@
     </div>
     <button id="start-btn">Create New Game</button>
     <button id="solve-btn">Solve</button>
-    
+    <label for="backtracking">Choose a Backtracking Method:</label>
+    <select name="backtracking" id="backtracking">
+        <option value="1">Normal</option>
+        <option value="2">MRV</option>
+    </select>
     </header>
 <body>
     <div id="stats">
         <p id="timer"></p>
         <p id="lives"></p>
+        <p id="recursion"></p>
     </div>    
     <div id="game">
         <div id="board"></div>
