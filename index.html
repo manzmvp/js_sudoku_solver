@@ -31,11 +31,14 @@
     </div>
     <button id="start-btn">Create New Game</button>
     <button id="solve-btn">Solve</button>
-    <label for="backtracking">Choose a Backtracking Method:</label>
-    <select name="backtracking" id="backtracking">
-        <option value="1">Normal</option>
-        <option value="2">MRV</option>
-    </select>
+    <div>
+        <label for="backtracking">Choose a Backtracking Method:</label>
+        <select name="backtracking" id="backtracking">
+            <option value="1">Normal</option>
+            <option value="2">MRV</option>
+        </select>
+    </div>
+    
     </header>
 <body>
     <div id="stats">
@@ -57,8 +60,13 @@
             <p id="nine">9</p>
         </div>
     </div>
-
-    
+    <footer>
+        <div class='console-container'>
+            <span id='text'></span>
+            <div class='console-underscore' id='console'>&#95;
+            </div>
+        </div>
+    </footer>
 <script src="main.js"></script>
 </body>
 </html>
